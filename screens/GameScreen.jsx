@@ -1,4 +1,4 @@
-import { View, StyleSheet, Alert, Text, FlatList } from 'react-native'
+import { View, StyleSheet, Alert, Text, FlatList, useWindowDimensions} from 'react-native'
 import React, {useState, useEffect} from 'react'
 import Title from '../components/ui/Title'
 import NumberContainer from '../components/game/NumberContainer';
@@ -25,6 +25,7 @@ function GameScreen({userNumber, onGameOver}){
   const initialGuess = generateRandomBetween(1, 100, userNumber) 
   const [currentGuess, setCurrentGuess] = useState(initialGuess)
   const [guessRound, setGuessRound] = useState([initialGuess])
+  const { width, height } = useWindowDimensions();
 
 
   useEffect( () => {
@@ -42,7 +43,7 @@ function GameScreen({userNumber, onGameOver}){
   function NewRandomNumber(direction){
 
     if ( (direction === 'lower' && currentGuess < userNumber ) || (direction === 'greater' && currentGuess > userNumber)) {
-        Alert.alert("Don't lie!", 'You know that this is wrong..', [{text: 'Sorry'}])      
+        Alert.alert("Don't lie!", 'You know that this is wrong..', [{text: 'Sorry'}])       
         return;
     }
     if (direction === 'lower'){
@@ -59,9 +60,9 @@ function GameScreen({userNumber, onGameOver}){
 
   const guessRoundsListLenght = guessRound.length;
 
-  return (
-    <View style={styles.screen}>
-        <Title title='Adivina el Numero!'/>
+
+  let content = (
+    <>
         <NumberContainer number={currentGuess} />
         <Card>
             <InstructionText personalStyle={styles.instructionText} title='Higher or lower?'/>
@@ -74,7 +75,32 @@ function GameScreen({userNumber, onGameOver}){
                     <PrimaryButton title='-' onPress={NewRandomNumber.bind(this, 'lower')}/>
                 </View>
             </View>   
-        </Card>  
+        </Card>    
+    </>
+  )
+
+  if ( width > 500 ) {
+    content = (
+        <>
+            <View style={styles.buttonsContainerWide}>
+                <View style={styles.button}>
+                    <PrimaryButton title = "+" onPress={NewRandomNumber.bind(this, 'greater')} />
+
+                </View>
+                <NumberContainer number={currentGuess}/>
+                <View style={styles.button}>
+                    <PrimaryButton title='-' onPress={NewRandomNumber.bind(this, 'lower')}/>
+                </View>
+            </View>
+        </>
+    )
+
+  }
+
+  return (
+    <View style={styles.screen}>
+        <Title title='Adivina el Numero!'/>
+        { content }
         <View style={styles.listContainer}>
             <FlatList 
                 data={guessRound} 
@@ -94,6 +120,7 @@ const styles = StyleSheet.create({
     screen:{
         flex: 1,
         padding: 12,
+        alignItems: 'center'
     },
 
     buttonContainer: {
@@ -108,6 +135,10 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
 
+    buttonsContainerWide: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
     listContainer: {
         flex: 1,
         padding: 16
